@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -198,8 +199,21 @@ public class WekaFeatureBuilder implements AutoCloseable {
   public static void main(String[] args)
       throws FileNotFoundException, ClassNotFoundException, SQLException, IOException, Exception {
 
-    String csvFilename = "/home/pmuruka/Dataset/multiparty_privacy/analysis-092415/case123.csv";
-    String arffFilename = "/home/pmuruka/Dataset/multiparty_privacy/analysis-092415/case123.arff";
+    // TODO: Change args to Unix switch (--arg) style
+    String outDir = args[0];
+    
+    String csvFilename = outDir + "case123.csv";
+    String arffFilename = outDir + "case123.arff";
+    
+    String mturkIdFilter = args[1];
+    
+    String scenarioFilter = args[2];
+    
+    String requireUniqieInstances = args[3];
+    
+    // Ignoring may be required to be consistent with Ricard (if regression
+    // models are used)
+    String ignoreOther = args[4];
 
     FastVector atts = new FastVector();
 
@@ -217,7 +231,9 @@ public class WekaFeatureBuilder implements AutoCloseable {
     policyAttVals.addElement("a");
     policyAttVals.addElement("b");
     policyAttVals.addElement("c");
-    // policyAttVals.addElement("other");
+    if (!ignoreOther.equalsIgnoreCase("true")) {
+      policyAttVals.addElement("other");
+    }
 
     FastVector argTypeAttVals = new FastVector();
     for (int i = 1; i <= 3; i++) {
@@ -285,20 +301,31 @@ public class WekaFeatureBuilder implements AutoCloseable {
               + " FROM turker_picturesurvey_response");
           PrintWriter csvWriter = new PrintWriter(csvFilename)) {
 
+        Set<String> mturkIds = MTurkIdFilter.filterMturkIds(featureBuilder.mConn, mturkIdFilter);
+
+        Set<String> scenarioIds = ScenarioFilter.filterScenarioIds(featureBuilder.mConn,
+            scenarioFilter);
+
+        Set<String> finsihedScenarioIds = new HashSet<String>();
+        
         while (rs.next()) {
           String mturkId = rs.getString("mturk_id");
           String scenarioId = rs.getString("scenario_id");
-
-          Set<String> mturkIds = MTurkIdFilter.filterMturkIds(featureBuilder.mConn, null);
-
-          if (mturkIds.contains(mturkId)) {
+          
+          if (mturkIds.contains(mturkId) && scenarioIds.contains(scenarioId)
+              && !finsihedScenarioIds.contains(scenarioId)) {
+            
+            if (requireUniqieInstances.equalsIgnoreCase("true")) {
+              finsihedScenarioIds.add(scenarioId);
+            }
+            
             String case1Policy = rs.getString("case1_policy");
             String case2Policy = rs.getString("case2_policy");
             String case3Policy = rs.getString("case3_policy");
 
-            if (case1Policy.equals("other") || case2Policy.equals("other")
-                || case3Policy.equals("other")) {
-              continue; // I am ignoring these to be consistent with Ricard
+            if (ignoreOther.equalsIgnoreCase("true") && (case1Policy.equals("other")
+                || case2Policy.equals("other") || case3Policy.equals("other"))) {
+              continue;
             }
 
             double[] vals = new double[data.numAttributes()];

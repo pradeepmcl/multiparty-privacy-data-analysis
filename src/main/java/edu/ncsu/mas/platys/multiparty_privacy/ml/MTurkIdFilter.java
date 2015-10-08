@@ -19,7 +19,7 @@ public class MTurkIdFilter {
       throws SQLException {
     Set<String> mturkIds = new HashSet<String>();
 
-    if (filterType == null) {
+    if (filterType == null || filterType.equals("null")) {
       try (Statement stmt = mConn.createStatement();
           ResultSet rs = stmt.executeQuery("SELECT mturk_id FROM turker_postsurvey_response");) {
         while (rs.next()) {
