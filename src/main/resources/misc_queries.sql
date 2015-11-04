@@ -63,3 +63,33 @@ select count(*) from (
     'a,a', 'a,a,a', 'b,b', 'b,b,b', 'c,c', 'c,c,c', 'other,other', 'other,other,other'
   )
 ) as T;
+
+# Insert sentiment related data
+CREATE TABLE turker_picturesurvey_response_justification_sentiment (
+  id INT NOT NULL auto_increment,
+  picturesurvey_id INT NOT NULL,
+  case1_sentiment TINYINT NOT NULL,
+  case2_sentiment TINYINT NOT NULL,
+  case3_sentiment TINYINT NOT NULL,
+  PRIMARY KEY (id)
+);
+
+ALTER TABLE turker_picturesurvey_response_justification_sentiment ADD INDEX picturesurvey_id (picturesurvey_id);
+
+ALTER TABLE turker_picturesurvey_response ADD INDEX mturk_id (mturk_id);
+
+LOAD DATA LOCAL INFILE '/home/pmuruka/Dataset/multiparty_privacy/sentiment/policy_justification_sentiment.csv' 
+  INTO TABLE turker_picturesurvey_response_justification_sentiment 
+  fields terminated by ',' enclosed by '"' lines terminated by '\n' 
+  (picturesurvey_id, case1_sentiment, case2_sentiment, case3_sentiment);
+
+SELECT image_sensitivity, image_sentiment,
+  (CASE WHEN case1_policy = 'a' THEN 1 WHEN case1_policy = 'b' THEN 0.5 WHEN case1_policy = 'c' THEN 0 END) AS case1_policy,
+  (CASE WHEN case2_policy = 'a' THEN 1 WHEN case2_policy = 'b' THEN 0.5 WHEN case2_policy = 'c' THEN 0 END) AS case2_policy,
+  (CASE WHEN case3_policy = 'a' THEN 1 WHEN case3_policy = 'b' THEN 0.5 WHEN case3_policy = 'c' THEN 0 END) AS case3_policy,
+  case1_sentiment, case2_sentiment, case3_sentiment
+FROM turker_picturesurvey_response 
+  LEFT OUTER JOIN turker_picturesurvey_response_justification_sentiment 
+  ON turker_picturesurvey_response.id = turker_picturesurvey_response_justification_sentiment.picturesurvey_id
+WHERE case1_policy != 'other' AND case2_policy != 'other' and case3_policy != 'other'
+INTO OUTFILE '/tmp/senti.csv' FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n';
