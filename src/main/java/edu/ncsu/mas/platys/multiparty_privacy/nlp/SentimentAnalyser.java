@@ -100,7 +100,7 @@ public class SentimentAnalyser implements AutoCloseable {
 
 			try (Statement stmt = sentimentAnalyser.mConn.createStatement();
 					ResultSet rs = stmt
-							.executeQuery("SELECT mturk_id, "
+							.executeQuery("SELECT id, "
 									+ " case1_policy_justification, case2_policy_justification, case3_policy_justification"
 									+ " FROM turker_picturesurvey_response");
 					PrintWriter csvWriter = new PrintWriter(csvFilename)) {
@@ -123,7 +123,7 @@ public class SentimentAnalyser implements AutoCloseable {
 				rs.beforeFirst();
 				
 				while (rs.next()) {
-					String mturkId = rs.getString("mturk_id");
+					String mturkId = rs.getString("id");
 					String case1_policy_justification = rs
 							.getString("case1_policy_justification");
 					String case2_policy_justification = rs
