@@ -92,7 +92,6 @@ public class SentimentAnalyser implements AutoCloseable {
 
 	public static void main(String[] args) throws FileNotFoundException,
 			ClassNotFoundException, IOException, Exception {
-		// TODO Auto-generated method stub
 		String outDir = "data/";
 		String csvFilename = outDir + "policy_justification_sentiment.csv";
 
