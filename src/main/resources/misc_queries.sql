@@ -93,3 +93,11 @@ FROM turker_picturesurvey_response
   ON turker_picturesurvey_response.id = turker_picturesurvey_response_justification_sentiment.picturesurvey_id
 WHERE case1_policy != 'other' AND case2_policy != 'other' and case3_policy != 'other'
 INTO OUTFILE '/tmp/senti.csv' FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n';
+
+select image_sensitivity, image_sentiment, image_relationship, case1_sentiment, case1_policy_justification, case1_policy
+from turker_picturesurvey_response 
+left outer join turker_picturesurvey_response_justification_sentiment 
+on turker_picturesurvey_response.id = turker_picturesurvey_response_justification_sentiment.picturesurvey_id 
+INTO OUTFILE '/tmp/policy_justifications.csv' 
+FIELDS TERMINATED BY ',' ENCLOSED BY '' ESCAPED BY '\\' LINES TERMINATED BY '\n';
+
