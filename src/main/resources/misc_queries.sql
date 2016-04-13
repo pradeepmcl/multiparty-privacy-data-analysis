@@ -64,6 +64,18 @@ select count(*) from (
   )
 ) as T;
 
+select scenario_id, image_sensitivity, image_sentiment
+from turker_picturesurvey_response
+where scenario_id in (
+  select scenario_id 
+  from turker_picturesurvey_response 
+  group by scenario_id 
+  having group_concat(case1_policy) in (
+    'a', 'a,a', 'a,a,a', 'b', 'b,b', 'b,b,b', 'c', 'c,c', 'c,c,c', 'other', 'other,other', 'other,other,other'
+  )
+)
+into outfile '/tmp/context_consistent.csv' FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n';
+
 # Insert sentiment related data
 CREATE TABLE turker_picturesurvey_response_justification_sentiment (
   id INT NOT NULL auto_increment,
