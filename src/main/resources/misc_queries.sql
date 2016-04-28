@@ -113,3 +113,6 @@ on turker_picturesurvey_response.id = turker_picturesurvey_response_justificatio
 INTO OUTFILE '/tmp/policy_justifications.csv' 
 FIELDS TERMINATED BY ',' ENCLOSED BY '' ESCAPED BY '\\' LINES TERMINATED BY '\n';
 
+SELECT avg(image_sensitivity), std(image_sensitivity), avg(image_sentiment), std(image_sentiment) 
+FROM turker_picturesurvey_response  where scenario_id in (select id from scenario where image_id = 12);
+
