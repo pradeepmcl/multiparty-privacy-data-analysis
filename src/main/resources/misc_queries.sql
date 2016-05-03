@@ -116,3 +116,10 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '' ESCAPED BY '\\' LINES TERMINATED BY '\n'
 SELECT avg(image_sensitivity), std(image_sensitivity), avg(image_sentiment), std(image_sentiment) 
 FROM turker_picturesurvey_response  where scenario_id in (select id from scenario where image_id = 12);
 
+SELECT image_people_count, count(*)
+FROM turker_picturesurvey_response  
+where scenario_id in (select id from scenario where image_id = 6) group by image_people_count;
+
+SELECT image_relationship, count(*)
+FROM turker_picturesurvey_response  
+where scenario_id in (select id from scenario where image_id = 1) group by image_relationship;
