@@ -130,6 +130,7 @@ public class WekaFeatureBuilder2 implements AutoCloseable {
     for (int policy : countsMap.keySet()) {
       if (countsMap.get(policy) > majorityCount) {
         majorityPolicy = policy;
+        majorityCount = countsMap.get(policy); // This line was missing in an early version
       }
     }
     return majorityPolicy;
